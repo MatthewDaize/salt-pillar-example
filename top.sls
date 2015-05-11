@@ -7,7 +7,9 @@ base:
     - role.salt-master
     - salt-dev.irtnog.org
 
-  'uxeprdlnxmine01.irtnog.net':
+  'uxeprd*mine*.irtnog.net':
     - environment.production
     - role.minecraft
+
+  'uxeprdlnxmine01.irtnog.net':
     - minecraft.irtnog.org
