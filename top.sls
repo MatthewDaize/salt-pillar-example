@@ -4,7 +4,7 @@
 ###   - env: the minion's assigned environment (e.g., production)
 ###   - os: 2-4 letter abbreviation of the O/S or hardware vendor
 ###         (e.g., nt, lnx, bsd, csco)
-###   - func: 2-4 letter abbreviation of the role (e.g., mx, salt)
+###   - func: 2-5 letter abbreviation of the role (e.g., mx, salt)
 ###   - id: two-digit identifier to make names unique
 ### Hostnames must be at most 15 characters long to comply with
 ### Microsoft NetBIOS name limits.
@@ -26,7 +26,7 @@ base:
   '???prd*.example.net':
     - environment.production
 
-  ## Make role assignments based on the hostname 'role' field.
+  ## Make role assignments based on the hostname 'func' field.
   '*mx??.example.net':
     - role.mail-relay
   '*lnxvirt??.example.net':
