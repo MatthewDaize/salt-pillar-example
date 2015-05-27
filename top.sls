@@ -8,29 +8,32 @@
 ###   - id: two-digit identifier to make names unique
 ### Hostnames must be at most 15 characters long to comply with
 ### Microsoft NetBIOS name limits.
+###
+### "example.net" is the private (internal) administrative realm.
+### "example.com" is the public (external) domain.
 
 base:
   '*':
     - defaults
 
   ## Make environment assignments based on the hostname 'env' field.
-  '???dev*.irtnog.net':
+  '???dev*.example.net':
     - environment.development
-  '???tst*.irtnog.net':
+  '???tst*.example.net':
     - environment.testing
-  '???stg*.irtnog.net':
+  '???stg*.example.net':
     - environment.staging
-  '???prd*.irtnog.net':
+  '???prd*.example.net':
     - environment.production
 
   ## Make role assignments based on the hostname 'role' field.
-  '*mx??.irtnog.net':
+  '*mx??.example.net':
     - role.mail-relay
-  '*lnxvirt??.irtnog.net':
+  '*lnxvirt??.example.net':
     - role.openstack
-  '*salt??.irtnog.net':
+  '*salt??.example.net':
     - role.salt-master
 
   ## Host-specific Pillars
-  'uxeprdlnxmine01.irtnog.net':
-    - minecraft.irtnog.org
+  'uxeprdlnxmine01.example.net':
+    - minecraft.example.com
