@@ -33,6 +33,8 @@ base:
     - role.openstack
   '*salt??.example.net':
     - role.salt-master
+  '*mine??.example.net':
+    - role.minecraft
 
   ## Host-specific Pillars
   'uxeprdlnxmine01.example.net':
