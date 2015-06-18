@@ -39,3 +39,5 @@ base:
   ## Host-specific Pillars
   'uxeprdlnxmine01.example.net':
     - minecraft.example.com
+  'uxeprdbsdsalt01.example.net':
+    - salt.example.com
