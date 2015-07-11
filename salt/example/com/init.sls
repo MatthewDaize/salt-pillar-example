@@ -1,14 +1,35 @@
-## The following is used by GitPython to access GitHub as a service
-## account named (hypothetically) @example-production-salt-master,
-## making use of the SSH configuration management capabilities of
-## https://github.com/saltstack-formulas/users-formula.  Note the use
-## of an RFC 2142 (https://www.ietf.org/rfc/rfc2142.txt) mailbox name
-## in the service account's email address.
+#### SALT/EXAMPLE/COM/INIT.SLS --- Production Salt master configuration example
+
+### For more information about the format of this file, see
+### http://docs.saltstack.com/en/latest/ref/states/top.html.  For more
+### information about change management procedures, see TODO.  The key
+### words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+### "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in
+### this document are to be interpreted as described in RFC 2119,
+### http://www.rfc-editor.org/rfc/rfc2119.txt.  The keywords "DANGER",
+### "WARNING", and "CAUTION" in this document are to be interpreted as
+### described in OSHA 1910.145,
+### https://www.osha.gov/pls/oshaweb/owadisp.show_document?p_table=standards&p_id=9794.
+
+####
+#### USERS-FORMULA SETTINGS
+####
+
+### The following is used by GitPython to access GitHub as a service
+### account named (hypothetically) @example-production-salt-master,
+### making use of the SSH configuration management capabilities of
+### https://github.com/saltstack-formulas/users-formula.  Note the use
+### of an RFC 2142 (https://www.ietf.org/rfc/rfc2142.txt) mailbox name
+### in the service account's email address.
 
 users:
-  root:
+  root:            # or whatever user the Salt master service runs as
+
+    ## push the GitHub account's SSH keys to the master
     ssh_keys_pillar:
       example-production-salt-master-2015-07-15: users_root_ssh_keys
+
+    ## configure the SSH client
     ssh_config:
       github:
         hostname: github.com
@@ -17,8 +38,8 @@ users:
           - StrictHostKeyChecking no
 
 users_root_ssh_keys:
+  ## example keymat (These keys---they do nothing!)
   example-production-salt-master-2015-07-15:
-    ## example keymat
     pubkey: |
       ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICpSlXcYFaHeOs0hTfjxSaTWl8gJQt+ZFBQlVFn2ak/w EXAMPLE Production Salt Master <noc@example.com>
     privkey: |
@@ -31,8 +52,12 @@ users_root_ssh_keys:
       V0AQI=
       -----END OPENSSH PRIVATE KEY-----
 
-## Remember to periodically re-run the salt.formulas SLS on the master
-## to refresh its copies of the listed Git repositories.
+####
+#### SALT-FORMULA SETTINGS
+####
+
+### Remember to periodically re-run the salt.formulas SLS on the
+### master to refresh its copies of the listed Git repositories.
 
 salt_formulas:
   git_opts:
@@ -127,12 +152,12 @@ salt_formulas:
       - twgs-formula
       - users-formula
 
-## Finally, here's how the Salt master gets configured by Salt, via
-## salt-formula.  Bootstrapping requires checking out copies of the
-## relevant formulas/pillars to the master's base environment and
-## running them manually using state.sls, e.g., "salt-call state.sls
-## users,salt.formulas,salt.master".  Once done these local copies
-## should be deleted.
+### Finally, here's how the Salt master gets configured by Salt, via
+### salt-formula.  Bootstrapping requires checking out copies of the
+### relevant formulas/pillars to the master's base environment and
+### running them manually using state.sls, e.g., "salt-call state.sls
+### users,salt.formulas,salt.master".  Once done these local copies
+### should be deleted.
 
 salt:
   master:
@@ -152,3 +177,5 @@ salt:
     win_gitrepos:
       - git@github.com:saltstack/salt-winrepo.git
       - git@github.com:example/salt-winrepo-private.git
+
+#### SALT/EXAMPLE/COM/INIT.SLS ends here.
