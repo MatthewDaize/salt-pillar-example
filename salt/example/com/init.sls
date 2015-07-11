@@ -1,7 +1,9 @@
 ## The following is used by GitPython to access GitHub as a service
 ## account named (hypothetically) @example-production-salt-master,
 ## making use of the SSH configuration management capabilities of
-## https://github.com/saltstack-formulas/users-formula.
+## https://github.com/saltstack-formulas/users-formula.  Note the use
+## of an RFC 2142 (https://www.ietf.org/rfc/rfc2142.txt) mailbox name
+## in the service account's email address.
 
 users:
   root:
