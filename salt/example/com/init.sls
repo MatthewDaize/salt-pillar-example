@@ -24,11 +24,9 @@
 
 users:
   root:            # or whatever user the Salt master service runs as
-
     ## push the GitHub account's SSH keys to the master
     ssh_keys_pillar:
       example-production-salt-master-2015-07-15: users_root_ssh_keys
-
     ## configure the SSH client
     ssh_config:
       github:
