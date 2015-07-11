@@ -31,32 +31,6 @@ users_root_ssh_keys:
       V0AQI=
       -----END OPENSSH PRIVATE KEY-----
 
-## Here's how the Salt master gets configured by Salt, via
-## salt-formula.  Bootstrapping requires checking out copies of the
-## relevant formulas/pillars to the master's base environment and
-## running them manually using state.sls, e.g., "salt-call state.sls
-## users,salt.formulas,salt.master".  Once done these local copies
-## should be deleted.
-
-salt:
-  master:
-    fileserver_backend:
-      - git
-      - roots
-    file_roots:
-      base:
-        - /usr/local/etc/salt/states
-      development:
-        - /usr/local/etc/salt/devstates
-    gitfs_provider: GitPython
-    gitfs_remotes:
-      - git@github.com:example/salt-states.git
-    ext_pillar:
-      - git: master git@github.com:example/salt-pillars.git
-    win_gitrepos:
-      - git@github.com:saltstack/salt-winrepo.git
-      - git@github.com:example/salt-winrepo-private.git
-
 ## Remember to periodically re-run the salt.formulas SLS on the master
 ## to refresh its copies of the listed Git repositories.
 
@@ -152,3 +126,29 @@ salt_formulas:
       - sudoers-formula
       - twgs-formula
       - users-formula
+
+## Finally, here's how the Salt master gets configured by Salt, via
+## salt-formula.  Bootstrapping requires checking out copies of the
+## relevant formulas/pillars to the master's base environment and
+## running them manually using state.sls, e.g., "salt-call state.sls
+## users,salt.formulas,salt.master".  Once done these local copies
+## should be deleted.
+
+salt:
+  master:
+    fileserver_backend:
+      - git
+      - roots
+    file_roots:
+      base:
+        - /usr/local/etc/salt/states
+      development:
+        - /usr/local/etc/salt/devstates
+    gitfs_provider: GitPython
+    gitfs_remotes:
+      - git@github.com:example/salt-states.git
+    ext_pillar:
+      - git: master git@github.com:example/salt-pillars.git
+    win_gitrepos:
+      - git@github.com:saltstack/salt-winrepo.git
+      - git@github.com:example/salt-winrepo-private.git
