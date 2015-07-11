@@ -9,7 +9,7 @@
 ### http://www.rfc-editor.org/rfc/rfc2119.txt.  The keywords "DANGER",
 ### "WARNING", and "CAUTION" in this document are to be interpreted as
 ### described in OSHA 1910.145,
-### https://www.osha.gov/pls/oshaweb/owadisp.show_document?p_table=standards&p_id=9794
+### https://www.osha.gov/pls/oshaweb/owadisp.show_document?p_table=standards&p_id=9794.
 
 ### NOTE REGARDING MINION NAMING CONVENTIONS: All minions have
 ### hostnames of the form "locenvosfuncid":
