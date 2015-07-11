@@ -1,3 +1,16 @@
+#### TOP.SLS ---Apply listed SLS modules to the targetd Salt minions
+
+### For more information about the format of this file, see
+### http://docs.saltstack.com/en/latest/topics/pillar/index.html.  For
+### more information about change management procedures, see TODO.
+### The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+### NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL"
+### in this document are to be interpreted as described in RFC 2119,
+### http://www.rfc-editor.org/rfc/rfc2119.txt.  The keywords "DANGER",
+### "WARNING", and "CAUTION" in this document are to be interpreted as
+### described in OSHA 1910.145,
+### https://www.osha.gov/pls/oshaweb/owadisp.show_document?p_table=standards&p_id=9794
+
 ### NOTE REGARDING MINION NAMING CONVENTIONS: All minions have
 ### hostnames of the form "locenvosfuncid":
 ###   - loc: the UN/LOCODE location of the minion (sans country code)
@@ -36,8 +49,10 @@ base:
   '*mine??.example.net':
     - role.minecraft
 
-  ## Host-specific Pillars
+  ## host-specific Pillars
   'uxeprdlnxmine01.example.net':
     - minecraft.example.com
   'uxeprdbsdsalt01.example.net':
     - salt.example.com
+
+#### TOP.SLS ends here.
