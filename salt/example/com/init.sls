@@ -1,11 +1,11 @@
 #### SALT/EXAMPLE/COM/INIT.SLS --- Production Salt master configuration example
 
 ### For more information about the format of this file, see
-### http://docs.saltstack.com/en/latest/ref/states/top.html.  For more
-### information about change management procedures, see TODO.  The key
-### words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-### "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in
-### this document are to be interpreted as described in RFC 2119,
+### http://docs.saltstack.com/en/latest/topics/pillar/index.html.  For
+### more information about change management procedures, see TODO.
+### The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+### NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL"
+### in this document are to be interpreted as described in RFC 2119,
 ### http://www.rfc-editor.org/rfc/rfc2119.txt.  The keywords "DANGER",
 ### "WARNING", and "CAUTION" in this document are to be interpreted as
 ### described in OSHA 1910.145,
