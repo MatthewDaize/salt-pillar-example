@@ -53,7 +53,11 @@ base:
   '*salt??.example.net':
     - role.salt-master
 
-  ## host-specific Pillars
+  ## Manually assign host- or service-specific Pillars.  The Pillar
+  ## SLS name follows the FQDN of the public service endpoint (e.g.,
+  ## several web servers might host "www.example.com", so they're
+  ## assigned that Pillar SLS, with the Pillar data stored in the file
+  ## www/example/com/init.sls).
   'uxeprdlnxmine01.example.net':
     - minecraft.example.com
   'uxeprdbsdsalt01.example.net':
