@@ -40,14 +40,18 @@ base:
     - environment.production
 
   ## Make role assignments based on the hostname 'func' field.
-  '*mx??.example.net':
-    - role.mail-relay
+  '*dsk??.example.net':
+    - role.desktop
+  '*lap??.example.net':
+    - role.laptop
   '*lnxvirt??.example.net':
     - role.openstack
-  '*salt??.example.net':
-    - role.salt-master
   '*mine??.example.net':
     - role.minecraft
+  '*mx??.example.net':
+    - role.mail-relay
+  '*salt??.example.net':
+    - role.salt-master
 
   ## host-specific Pillars
   'uxeprdlnxmine01.example.net':
