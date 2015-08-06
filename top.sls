@@ -34,8 +34,6 @@ base:
     - environment.development
   '???tst*.example.net':
     - environment.testing
-  '???stg*.example.net':
-    - environment.staging
   '???prd*.example.net':
     - environment.production
 
