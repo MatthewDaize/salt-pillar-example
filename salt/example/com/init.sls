@@ -308,6 +308,13 @@ salt:
     win_gitrepos:
       - git@github.com:example/salt-winrepo.git # fork of saltstack/salt-winrepo.git
       - git@github.com:example/salt-winrepo-private.git
+    ## This is required by the current version of SaltPad.  (Public
+    ## access to the master via the REST API should go through the
+    ## WSGI-hosted service endpoint that's protected by ModSecurity.)
+    rest_cherrypy:
+      port: 8000
+      ssl_crt: /usr/local/etc/apache24/certs/salt.example.com.cert
+      ssl_key: /usr/local/etc/apache24/keys/salt.example.com.key
     external_auth:              # required by salt-api
       pam:
         someuser:
@@ -340,7 +347,8 @@ salt:
 ### configuration is hosted by mod_wsgi.
 
 saltpad:
-  api_url: https://salt.example.com/saltstack
+  ## The current version only works with the salt-api service.
+  api_url: https://salt.example.com:8000
 
   ## Generate a random key with the following shell command:
   ## python -c 'import os, pprint; pprint.pprint(os.urandom(24))'
