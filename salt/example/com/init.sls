@@ -35,6 +35,16 @@ users:
           - IdentityFile ~/.ssh/example-production-salt-master-2015-07-15
           - StrictHostKeyChecking no
 
+  saltapi:                      # apache/wsgi privilege separation
+    home: /var/empty
+    createhome: no
+    password: '*'
+
+  saltpad:                      # apache/wsgi privilege separation
+    home: /var/empty
+    createhome: no
+    password: '*'
+
 users_root_ssh_keys:
   ## example keymat (These keys---they do nothing!)
   example-production-salt-master-2015-07-15:
