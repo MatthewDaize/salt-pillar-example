@@ -58,6 +58,10 @@ base:
   ## www/example/com/init.sls).
   'uxeprdlnxmine01.example.net':
     - minecraft.example.com
+  'uxeprdbsdmx01.example.net':
+    - mx1.example.com
+  'uxeprdbsdmx02.example.net':
+    - mx2.example.com
   'uxeprdbsdsalt01.example.net':
     - salt.example.com
 
