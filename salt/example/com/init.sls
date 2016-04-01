@@ -15,21 +15,16 @@
 #### USERS-FORMULA SETTINGS
 ####
 
-### The following is used by GitPython to access GitHub as a service
-### account named (hypothetically) @example-production-salt-master,
-### making use of the SSH configuration management capabilities of
-### https://github.com/saltstack-formulas/users-formula.  Note the use
-### of an RFC 2142 (http://www.rfc-editor.org/rfc/rfc2142.txt) mailbox
-### name in the service account's email address.
-
 users:
-  root:            # or whatever user the Salt master service runs as
-    ## push the GitHub account's SSH keys to the master
-    ssh_keys_pillar:
-      example-production-salt-master-2015-07-15: users_root_ssh_keys
-    ## configure the SSH client
+  salt:                         # run salt-master as non-root
+    home: /usr/local/etc/salt
+    createhome: no
+    password: '*'
+    ssh_keys_pillar:            # push GitHub account's SSH keys to master
+      example-production-salt-master-2015-07-15:
+        users_salt_ssh_keys
     ssh_config:
-      github:
+      github:                   # settings for GitPython
         hostname: github.com
         options:
           - IdentityFile ~/.ssh/example-production-salt-master-2015-07-15
@@ -39,15 +34,26 @@ users:
     home: /var/empty
     createhome: no
     password: '*'
+    groups:
+      - salt
 
   saltpad:                      # apache/wsgi privilege separation
     home: /var/empty
     createhome: no
     password: '*'
+    groups:
+      - salt
 
-users_root_ssh_keys:
-  ## example keymat (These keys---they do nothing!)
+### The following is used by GitPython to access GitHub as a service
+### account named (hypothetically) @example-production-salt-master,
+### making use of the SSH configuration management capabilities of
+### https://github.com/saltstack-formulas/users-formula.  Note the use
+### of an RFC 2142 (http://www.rfc-editor.org/rfc/rfc2142.txt) mailbox
+### name in the service account's email address.
+
+users_salt_ssh_keys:
   example-production-salt-master-2015-07-15:
+    ## example keymat (These keys---they do nothing!)
     pubkey: |
       ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICpSlXcYFaHeOs0hTfjxSaTWl8gJQt+ZFBQlVFn2ak/w EXAMPLE Production Salt Master <noc@example.com>
     privkey: |
@@ -111,6 +117,7 @@ apache:
             Directory /usr/local/lib/python2.7/site-packages/salt/netapi/rest_cherrypy/:
               WSGIProcessGroup: saltstack
               Require all: granted
+
             ## saltpad (SaltStack web UI via Flask)
             WSGIDaemonProcess saltpad: processes=2 threads=5
             WSGIScriptAlias /saltpad: /opt/saltpad/saltpad.wsgi
@@ -120,7 +127,7 @@ apache:
   keypairs:
     salt.example.com:
       ## list the server certificate first followed by intermediate
-      ## (chain) certificates, in leaf-to-root order
+      ## (a/k/a chain) certificate(s), in leaf-to-root order
       certificate: |
         -----BEGIN CERTIFICATE-----
         XoeaUnFuAXE73GlKja4LiBkXMyEe1QOMwqvQOP+dbUc7C4GVy11PFsR3srRC578l
@@ -196,6 +203,111 @@ poudriere:
 #### SALT-FORMULA SETTINGS
 ####
 
+{# list of active Salt state formulas #}
+{% set formulas = [
+    'active-directory-formula',
+    'docker-formula',
+    'epel-formula',
+    'fail2ban-formula',
+    'firewalld-formula',
+    'git-formula',
+    'jenkins-formula',
+    'mysql-formula',
+    'ntp-formula',
+    'nux-formula',
+    'openstack-formula',
+    'os-hardening-formula',
+    'owncloud-formula',
+    'postgres-formula',
+    'rabbitmq-formula',
+    'salt-formula',
+    'shibboleth-formula',
+    'snmp-formula',
+    'spigotmc-formula',
+    'sudoers-formula',
+    'tomcat-formula',
+    'twgs-formula',
+    'ufw-formula',
+    'users-formula',
+  ] %}
+
+salt:
+  ## Here's how the Salt master gets configured by Salt, via
+  ## salt-formula.  Bootstrapping requires checking out copies of the
+  ## relevant formulas/pillars to the master's base environment and
+  ## running them manually using state.sls, e.g., "salt-call state.sls
+  ## users,salt.formulas,salt.master".  Once done these local copies
+  ## should be deleted.
+  master:
+    fileserver_backend:
+      - git
+      - roots
+    file_roots:
+      base:
+        - /usr/local/etc/salt/states
+      development:              # local dev access on the salt master
+        {% for formula in formulas %}
+        - /code/{{ formula }}   # clone of formula repo
+        {% endfor %}
+        - /code/salt-states     # clone of state repo, dev branch
+    gitfs_provider: GitPython
+    gitfs_remotes:
+      - git@github.com:example/salt-states.git
+    ext_pillar:
+      - git: master git@github.com:example/salt-pillars.git
+    win_gitrepos:
+      - git@github.com:example/salt-winrepo.git # fork of saltstack/salt-winrepo.git
+      - git@github.com:example/salt-winrepo-private.git
+
+    ## The current version of SaltPad requires the following.  Public
+    ## access to the master via the REST API should go through the
+    ## WSGI-hosted service endpoint that's protected by ModSecurity.
+    rest_cherrypy:
+      port: 8000
+      ssl_crt:
+        /usr/local/etc/apache24/certs/salt.example.com.cert
+      ssl_key:
+        /usr/local/etc/apache24/keys/salt.example.com.key
+      webhook_disable_auth:     # secure by using hidden URLs; see below
+        True
+    external_auth:              # used by salt-api
+      pam:
+        someuser:
+          - .*
+          - '@runner'
+          - '@wheel'
+
+  reactor:
+    - 'salt/key':
+        - /usr/local/etc/salt/reactors/firstrun.sls
+
+    ## The hook URL acts as a preshared key.  The reactor should also
+    ## check the GitHub signature via its shared secret.
+    - 'salt/netapi/hook/github/example/12345':
+        - /usr/local/etc/salt/reactors/github.sls
+
+  github:
+    hook_secret: skroob         # used by github reactor listed above
+
+  ## These settings control salt-cloud.  Note that salt-formula does
+  ## not provide templates for the contents of
+  ## cloud.{maps,profiles,providers}.d/*.conf; instead, refer to the
+  ## files named after the corresponding provider in the
+  ## irtnog/salt-states.git repository, under salt/files/ in one of
+  ## the four branches (development, testing, staging, or production).
+  cloud:
+    master: salt.example.com
+    folders:
+      - cloud.providers.d/key
+      - cloud.profiles.d
+      - cloud.maps.d
+    providers:
+      - example-ec2
+
+    ## use an instance profile instead for better security
+    example-ec2-key-id: AKIAIOSFODNN7EXAMPLE
+    example-ec2-secret: wJalrXUtnFEMI/K7MDENG/bPxRfiCYzEXAMPLEKEY
+
 ### Remember to periodically re-run the salt.formulas SLS on the
 ### master to refresh its copies of the listed Git repositories.  Best
 ### practice is to fork the desired formulas, so that changes are
@@ -213,141 +325,9 @@ salt_formulas:
     group: wheel
     mode: 755
   list:
-    development:
-      - epel-formula
-      - fail2ban-formula
-      - git-formula
-      - jenkins-formula
-      - mysql-formula
-      - ntp-formula
-      - nux-formula
-      - openstack-formula
-      - openssh-formula
-      - os-hardening-formula
-      - owncloud-formula
-      - postgres-formula
-      - rabbitmq-formula
-      - salt-formula
-      - snmp-formula
-      - spigotmc-formula
-      - sudoers-formula
-      - twgs-formula
-      - users-formula
-    testing:
-      - epel-formula
-      - fail2ban-formula
-      - git-formula
-      - jenkins-formula
-      - mysql-formula
-      - ntp-formula
-      - nux-formula
-      - openstack-formula
-      - openssh-formula
-      - os-hardening-formula
-      - owncloud-formula
-      - postgres-formula
-      - rabbitmq-formula
-      - salt-formula
-      - snmp-formula
-      - spigotmc-formula
-      - sudoers-formula
-      - twgs-formula
-      - users-formula
-    staging:
-      - epel-formula
-      - fail2ban-formula
-      - git-formula
-      - jenkins-formula
-      - mysql-formula
-      - ntp-formula
-      - nux-formula
-      - openstack-formula
-      - openssh-formula
-      - os-hardening-formula
-      - owncloud-formula
-      - postgres-formula
-      - rabbitmq-formula
-      - salt-formula
-      - snmp-formula
-      - spigotmc-formula
-      - sudoers-formula
-      - twgs-formula
-      - users-formula
-    production:
-      - epel-formula
-      - fail2ban-formula
-      - git-formula
-      - jenkins-formula
-      - mysql-formula
-      - ntp-formula
-      - nux-formula
-      - openstack-formula
-      - openssh-formula
-      - os-hardening-formula
-      - owncloud-formula
-      - postgres-formula
-      - rabbitmq-formula
-      - salt-formula
-      - snmp-formula
-      - spigotmc-formula
-      - sudoers-formula
-      - twgs-formula
-      - users-formula
-
-salt:
-  ## Here's how the Salt master gets configured by Salt, via
-  ## salt-formula.  Bootstrapping requires checking out copies of the
-  ## relevant formulas/pillars to the master's base environment and
-  ## running them manually using state.sls, e.g., "salt-call state.sls
-  ## users,salt.formulas,salt.master".  Once done these local copies
-  ## should be deleted.
-  master:
-    fileserver_backend:
-      - git
-      - roots
-    file_roots:
-      base:
-        - /usr/local/etc/salt/states
-      development:
-        - /usr/local/etc/salt/devstates
-    gitfs_provider: GitPython
-    gitfs_remotes:
-      - git@github.com:example/salt-states.git
-    ext_pillar:
-      - git: master git@github.com:example/salt-pillars.git
-    win_gitrepos:
-      - git@github.com:example/salt-winrepo.git # fork of saltstack/salt-winrepo.git
-      - git@github.com:example/salt-winrepo-private.git
-    ## This is required by the current version of SaltPad.  (Public
-    ## access to the master via the REST API should go through the
-    ## WSGI-hosted service endpoint that's protected by ModSecurity.)
-    rest_cherrypy:
-      port: 8000
-      ssl_crt: /usr/local/etc/apache24/certs/salt.example.com.cert
-      ssl_key: /usr/local/etc/apache24/keys/salt.example.com.key
-    external_auth:              # required by salt-api
-      pam:
-        someuser:
-          - .*
-          - '@runner'
-          - '@wheel'
-
-  ## These settings control salt-cloud.  Note that salt-formula does
-  ## not provide templates for the contents of
-  ## cloud.{maps,profiles,providers}.d/*.conf; instead, refer to the
-  ## files named after the corresponding provider in the
-  ## irtnog/salt-states.git repository, under salt/files/ in one of
-  ## the four branches (development, testing, staging, or production).
-  cloud:
-    master: salt.example.com
-    folders:
-      - cloud.providers.d/key
-      - cloud.profiles.d
-      - cloud.maps.d
-    providers:
-      - example-ec2
-    example-ec2-key-id: AKIAIOSFODNN7EXAMPLE
-    example-ec2-secret: wJalrXUtnFEMI/K7MDENG/bPxRfiCYzEXAMPLEKEY
+    {{ {'testing': formulas,
+        'staging': formulas,
+        'production': formulas,}|yaml }}
 
 ####
 #### SALTPAD SLS SETTINGS
