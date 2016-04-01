@@ -25,44 +25,66 @@
 ### "example.net" is the private (internal) administrative realm.
 ### "example.com" is the public (external) domain.
 
+### NOTE REGARDING PCRE: Minion IDs may not be consistenly lower
+### cased, so this uses case-insensitive regular expressions to match
+### minion IDs.
+
 base:
   '*':
     - defaults
 
   ## Make environment assignments based on the hostname 'env' field.
-  '???dev*.example.net':
+  '(?i)...dev.*\.example\..net':
+    - match: pcre
     - environment.development
-  '???tst*.example.net':
+  '(?i)...tst.*\.example\.net':
+    - match: pcre
     - environment.testing
-  '???prd*.example.net':
+  '(?i)...prd.*\.example\.net':
+    - match: pcre
     - environment.production
 
   ## Make role assignments based on the hostname 'func' field.
-  '*dsk??.example.net':
-    - role.desktop
-  '*lap??.example.net':
-    - role.laptop
-  '*lnxvirt??.example.net':
+  '(?i).*lnxvirt[0-9a-f]{2}\.example\.net':
+    - match: pcre
     - role.openstack
-  '*mine??.example.net':
+  '(?i).*mine[0-9a-f]{2}\.example\.net':
+    - match: pcre
     - role.minecraft
-  '*mx??.example.net':
+  '(?i).*mx[0-9a-f]{2}\.example\.net':
+    - match: pcre
     - role.mail-relay
-  '*salt??.example.net':
+  '(?i).*salt[0-9a-f]{2}\.example\.net':
+    - match: pcre
     - role.salt-master
+
+  ## Desktops and laptops use a different naming convention because
+  ## there are many more of them (relative to servers).
+  '(?i)d[0-9]{8}\.example\.net':
+    - match: pcre
+    - environment.production
+    - role.desktop
+  '(?i)l[0-9]{8}\.example\.net':
+    - match: pcre
+    - environment.production
+    - role.laptop
 
   ## Manually assign host- or service-specific Pillars.  The Pillar
   ## SLS name follows the FQDN of the public service endpoint (e.g.,
   ## several web servers might host "www.example.com", so they're
   ## assigned that Pillar SLS, with the Pillar data stored in the file
   ## www/example/com/init.sls).
-  'uxeprdlnxmine01.example.net':
+  '(?i)uxeprdlnxmine01\.example\.net':
+    - match: pcre
     - minecraft.example.com
-  'uxeprdbsdmx01.example.net':
+  '(?i)uxeprdbsdmx01\.example\.net':
+    - match: pcre
     - mx1.example.com
-  'uxeprdbsdmx02.example.net':
+  '(?i)uxeprdbsdmx02\.example\.net':
+    - match: pcre
     - mx2.example.com
-  'uxeprdbsdsalt01.example.net':
+  '(?i)uxeprdbsdsalt01\.example\.net':
+    - match: pcre
     - salt.example.com
 
 #### TOP.SLS ends here.
