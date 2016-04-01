@@ -86,5 +86,8 @@ base:
   '(?i)uxeprdbsdsalt01\.example\.net':
     - match: pcre
     - salt.example.com
+  '(?i)uxeprdbsdweb0[1-2]\.example\.net':
+    - match: pcre
+    - www.example.com
 
 #### TOP.SLS ends here.
