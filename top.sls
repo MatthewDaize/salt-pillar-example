@@ -57,6 +57,9 @@ base:
   '(?i).*salt[0-9a-f]{2}\.example\.net':
     - match: pcre
     - role.salt-master
+  '(?i).*idp[0-9a-f]{2}\.example\.net':
+    - match: pcre
+    - role.shibboleth-idp
 
   ## Desktops and laptops use a different naming convention because
   ## there are many more of them (relative to servers).
@@ -89,5 +92,8 @@ base:
   '(?i)uxeprdbsdweb0[1-2]\.example\.net':
     - match: pcre
     - www.example.com
+  '(?i)uxeprdlnxidp0[1-2]\.example\.net':
+    - match: pcre
+    - login.example.com
 
 #### TOP.SLS ends here.
