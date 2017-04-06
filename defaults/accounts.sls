@@ -16,57 +16,105 @@
 ### described in OSHA 1910.145,
 ### https://www.osha.gov/pls/oshaweb/owadisp.show_document?p_table=standards&p_id=9794.
 
-users:
-  critical:
-    {% if grains['os_family'] == 'Windows' %}
+defaults:
+  root:
     password: &rootpass |
       -----BEGIN PGP MESSAGE-----
       Version: GnuPG v2
 
       ...
       -----END PGP MESSAGE-----
-    {% else %}
-    password: &rootpasshash |
+    password_hash: &rootpasshash |
       -----BEGIN PGP MESSAGE-----
       Version: GnuPG v2
 
       ...
       -----END PGP MESSAGE-----
-    {% endif %}
-    ssh_auth:
-      - &rootsshauthkey1 |
+    ssh_auth: &rootsshauthkeys
+      - |
         -----BEGIN PGP MESSAGE-----
         Version: GnuPG v2
 
         ...
         -----END PGP MESSAGE-----
-    sudouser: True
-    sudo_rules:
+  sudo:
+    rules:
       - &sudorule1 |
         -----BEGIN PGP MESSAGE-----
         Version: GnuPG v2
 
         ...
         -----END PGP MESSAGE-----
+      - &sudorule2 |
+        -----BEGIN PGP MESSAGE-----
+        Version: GnuPG v2
 
-  {% if grains['os_family'] in [ 'Windows', ] %}
+        ...
+        -----END PGP MESSAGE-----
+
+{%- if grains.os_family == 'Windows' %}
+
+users:
   Administrator:
+    password:
+      *rootpass
     prime_group:
-      name: Administrators
-    password: *rootpass
+      name:
+        Administrators
+    createhome:
+      False
+    home:
+      'C:\Users\Administrator'
+    shell:
+      False
 
-  {% elif grains['os_family'] in [ 'Arch', 'Debian', 'Gentoo', 'FreeBSD', 'NetBSD', 'OpenBSD', 'RedHat', 'Solaris', 'Suse', ] %}
-  root:
-    home: /root
-    {% if grains['os_family'] in [ 'FreeBSD', 'NetBSD', 'OpenBSD', ] %}
+  critical:
+    password:
+      *rootpass
     prime_group:
-      name: wheel
-      gid: 0
-    {% endif %}
-    password: *rootpasshash
+      name:
+        Administrators
+    createhome:
+      False
+    home:
+      'C:\Users\critical'
+    shell:
+      False
+
+{%- else %}
+
+users:
+  root:
+    home:
+      /root
+    password:
+      *rootpasshash
     ssh_auth:
-      - *rootsshauthkey1
-  {% endif %}
+      *rootsshauthkeys
+{%-   if grains.os_family in [
+        'FreeBSD',
+        'NetBSD',
+        'OpenBSD',
+      ]
+%}
+    prime_group:
+      name:
+        wheel
+      gid:
+        0
+{%-   endif %}
+
+  critical:
+    password:
+      *rootpasshash
+    ssh_auth:
+      *rootsshauthkeys
+    sudouser:
+      True
+    sudo_rules:
+      - *sudorule1
+
+{%- endif %}
 
 sudoers:
   aliases:
@@ -77,28 +125,35 @@ sudoers:
         - /sbin/poweroff
   defaults:
     generic:
-      # - log_input             # enable command input logging (potentially insecure)
-      - log_output              # enable command output logging
-      - mail_badpass            # email root upon sudo login failures
+      ## enable command input logging (potentially insecure -
+      ## currently disabled)
+      # - log_input
+      ## enable command output logging
+      - log_output
+      ## email root upon sudo login failures
+      - mail_badpass
       ## reset the executable search path
       - secure_path="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
     command_list:
       ## don't log output of following commands
-      /usr/sbin/sudoreplay: '!log_output'
-      /usr/local/sbin/sudoreplay: '!log_output'
-      REBOOT: '!log_output'
+      /usr/sbin/sudoreplay:
+        '!log_output'
+      /usr/local/sbin/sudoreplay:
+        '!log_output'
+      REBOOT:
+        '!log_output'
   users:
     root:
-      - &sudorule2 |
-        -----BEGIN PGP MESSAGE-----
-        Version: GnuPG v2
-
-        ...
-        -----END PGP MESSAGE-----
+      - *sudorule2
   groups:
     'Domain\ Admins':
       - *sudorule1
     'Unix\ Admins':
       - *sudorule1
+
+mysql:
+  server:
+    root_password:
+      *rootpass
 
 #### DEFAULTS.ACCOUNTS ends here.
