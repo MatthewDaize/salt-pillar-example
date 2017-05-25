@@ -255,8 +255,11 @@ salt:
       - git@github.com:example/salt-states.git
     ext_pillar:
       - git: master git@github.com:example/salt-pillars.git
-    win_gitrepos:
+    winrepo_provider: GitPython
+    winrepo_remotes:
       - git@github.com:example/salt-winrepo.git # fork of saltstack/salt-winrepo.git
+    winrepo_remotes_ng:
+      - git@github.com:example/salt-winrepo-ng.git # fork of saltstack/salt-winrepo-ng.git
       - git@github.com:example/salt-winrepo-private.git
 
     ## The current version of SaltPad requires the following.  Public
