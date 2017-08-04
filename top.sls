@@ -72,8 +72,8 @@ base:
     - environment.production
     - role.laptop
 
-  ## Manually assign host- or service-specific Pillars.  The Pillar
-  ## SLS name follows the FQDN of the public service endpoint (e.g.,
+  ## Manually assign service-specific Pillar SLSes.  The Pillar SLS
+  ## name follows the FQDN of the public service endpoint (e.g.,
   ## several web servers might host "www.example.com", so they're
   ## assigned that Pillar SLS, with the Pillar data stored in the file
   ## www/example/com/init.sls).
@@ -95,5 +95,10 @@ base:
   '(?i)uxeprdlnxidp0[1-2]\.example\.net':
     - match: pcre
     - login.example.com
+
+  ## Finally, assign an optional host-specific Pillar SLS.
+  {{ grains.id|yaml_encode }}:
+    - ignore_missing: True
+    - {{ grains.id|lower|yaml_encode }}
 
 #### TOP.SLS ends here.
